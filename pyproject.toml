@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "osiris"
+version = "0.1.0"
+description = "CLI backup management tool wrapping restic for PostgreSQL and MinIO"
+authors = ["Kriib"]
+readme = "README.md"
+packages = [{include = "osiris", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+click = "^8.1"
+pyyaml = "^6.0"
+iris = {git = "https://github.com/jaalbin24/iris.git", tag = "v1.0.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-mock = "^3.12"
+pytest-cov = "^7.0.0"
+ruff = "^0.8"
+
+[tool.poetry.scripts]
+osiris = "osiris.cli:cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM", "RUF"]
+ignore = [
+    "E501",    # Line too long (handled by formatter)
+    "B904",    # raise from - not useful for CLI early exits
+    "SIM105",  # contextlib.suppress - try/except/pass often clearer
+    "SIM108",  # Ternary operator - if/else often more readable
+    "SIM102",  # Collapsible if - nested often more readable
+    "RUF005",  # List concatenation - often clearer than unpacking
+    "RUF022",  # __all__ sorting - categorical organization preferred
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/osiris/cli.py" = ["E402"]  # Imports after cli group definition is intentional
+
+[tool.ruff.lint.isort]
+known-first-party = ["osiris"]
