@@ -1,9 +1,23 @@
 """Shared test fixtures."""
 
 import json
+import os
 from unittest.mock import MagicMock
 
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def set_test_environment(monkeypatch):
+    """
+    Automatically set OSIRIS_ENV=test for all tests.
+
+    This ensures tests use local paths (relative to config directory)
+    instead of system paths like /etc/osiris/.
+
+    See docs/environment.md for details on the environment system.
+    """
+    monkeypatch.setenv("OSIRIS_ENV", "test")
 
 
 @pytest.fixture

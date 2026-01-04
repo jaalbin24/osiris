@@ -60,8 +60,8 @@ targets:
         with pytest.raises(ConfigError, match="Missing required field: repository"):
             load_config(str(config_path))
 
-    def test_missing_targets(self, tmp_path):
-        """Test error when no targets are defined."""
+    def test_empty_targets_allowed(self, tmp_path):
+        """Test that empty targets section is allowed (for post-init config)."""
         password_path = tmp_path / "password"
         password_path.write_text("test")
 
@@ -72,8 +72,9 @@ password_file: {password_path}
 targets: {{}}
 """)
 
-        with pytest.raises(ConfigError, match="At least one target must be defined"):
-            load_config(str(config_path))
+        # Empty targets should be allowed - user will add them after init
+        config = load_config(str(config_path))
+        assert config.targets == {}
 
     def test_invalid_target_type(self, tmp_path):
         """Test error on invalid target type."""
