@@ -166,14 +166,15 @@ def load_config(path: str = "/etc/osiris/config.yaml") -> Config:
             f"repository must be a string, got {type(repository).__name__}"
         )
 
-    # Validate password_file exists
+    # Validate password_file path
     password_file = raw["password_file"]
     if not isinstance(password_file, str):
         raise ConfigError(
             f"password_file must be a string, got {type(password_file).__name__}"
         )
-    if not Path(password_file).exists():
-        raise ConfigError(f"password_file not found: {password_file}")
+    # Note: password_file existence is NOT checked here.
+    # The file is created by 'osiris init'. If missing when running
+    # other commands, restic will fail with a clear error.
 
     # Parse logging (with defaults)
     logging_raw = raw.get("logging", {})
@@ -202,8 +203,8 @@ def load_config(path: str = "/etc/osiris/config.yaml") -> Config:
     targets_raw = raw.get("targets", {})
     if not isinstance(targets_raw, dict):
         raise ConfigError("targets must be a mapping")
-    if not targets_raw:
-        raise ConfigError("At least one target must be defined")
+    # Note: Empty targets is allowed after 'osiris init'.
+    # The 'backup' command will warn if no targets are configured.
 
     targets: dict[str, PostgresTargetConfig | RsyncTargetConfig] = {}
     for name, target_raw in targets_raw.items():

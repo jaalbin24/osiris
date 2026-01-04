@@ -7,6 +7,10 @@ from osiris.config import ConfigError, load_config
 from osiris.logging import setup_logging
 
 
+# Commands that can run without a config file
+BOOTSTRAP_COMMANDS = {"init"}
+
+
 @click.group()
 @click.option(
     "--config", "-c", default="/etc/osiris/config.yaml", help="Config file path"
@@ -19,14 +23,24 @@ def cli(ctx, config, non_interactive, verbose, debug):
     """Osiris - Backup management for Kriib infrastructure."""
     ctx.ensure_object(dict)
 
-    # Initialize UI
+    # Store config path for use by init command
+    ctx.obj["config_path"] = config
+
+    # Initialize UI (always needed)
     ctx.obj["ui"] = UI(interactive=not non_interactive, verbose=verbose, debug=debug)
 
-    # Load configuration
+    # Skip config loading for bootstrap commands
+    if ctx.invoked_subcommand in BOOTSTRAP_COMMANDS:
+        ctx.obj["config"] = None
+        ctx.obj["logger"] = None
+        return
+
+    # Load configuration for all other commands
     try:
         ctx.obj["config"] = load_config(config)
     except FileNotFoundError as e:
         ctx.obj["ui"].error(str(e))
+        ctx.obj["ui"].hint("Run 'osiris init' to initialize the system")
         raise SystemExit(1) from None
     except ConfigError as e:
         ctx.obj["ui"].error(f"Configuration error: {e}")
