@@ -121,8 +121,14 @@ def mock_subprocess(mocker):
             self.calls.append((cmd, kwargs))
             resp = self._find_response(cmd)
             result = MagicMock()
-            result.stdout = resp["stdout"]
-            result.stderr = resp["stderr"]
+            stdout = resp["stdout"]
+            stderr = resp["stderr"]
+            # Handle text=True parameter - decode bytes to strings
+            if kwargs.get("text"):
+                stdout = stdout.decode() if isinstance(stdout, bytes) else stdout
+                stderr = stderr.decode() if isinstance(stderr, bytes) else stderr
+            result.stdout = stdout
+            result.stderr = stderr
             result.returncode = resp["returncode"]
             if kwargs.get("check") and resp["returncode"] != 0:
                 import subprocess
