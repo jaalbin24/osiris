@@ -6,7 +6,6 @@ from iris import UI
 from osiris.config import ConfigError, load_config
 from osiris.logging import setup_logging
 
-
 # Commands that can run without a config file
 BOOTSTRAP_COMMANDS = {"init"}
 

@@ -10,7 +10,9 @@ from osiris.cli import cli
 class TestStatusCommand:
     """Tests for status command."""
 
-    def test_status_shows_repository_info(self, tmp_config, mock_subprocess, mock_restic_snapshots):
+    def test_status_shows_repository_info(
+        self, tmp_config, mock_subprocess, mock_restic_snapshots
+    ):
         """Test that status shows repository information."""
         # Mock restic snapshots (for is_initialized check and snapshots list)
         mock_subprocess.add_response(
@@ -43,7 +45,9 @@ class TestStatusCommand:
         assert "repository" in result.output.lower()
         assert "initialized" in result.output.lower()
 
-    def test_status_shows_last_backup(self, tmp_config, mock_subprocess, mock_restic_snapshots):
+    def test_status_shows_last_backup(
+        self, tmp_config, mock_subprocess, mock_restic_snapshots
+    ):
         """Test that status shows last backup time."""
         mock_subprocess.add_response(
             cmd_contains=["restic", "snapshots"],
@@ -71,7 +75,9 @@ class TestStatusCommand:
 
         assert "last backup" in result.output.lower()
 
-    def test_status_shows_timer_status(self, tmp_config, mock_subprocess, mock_restic_snapshots):
+    def test_status_shows_timer_status(
+        self, tmp_config, mock_subprocess, mock_restic_snapshots
+    ):
         """Test that status shows systemd timer status."""
         mock_subprocess.add_response(
             cmd_contains=["restic", "snapshots"],

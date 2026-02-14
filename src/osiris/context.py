@@ -2,6 +2,7 @@
 
 import functools
 import logging
+import shutil
 import subprocess
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, NoReturn
@@ -43,6 +44,12 @@ def get_context(ctx: click.Context) -> CommandContext:
             c.logger.info("Doing work")
     """
     from osiris.restic import Restic
+
+    # Check restic binary is available
+    if not shutil.which("restic"):
+        ctx.obj["ui"].error("restic binary not found in PATH")
+        ctx.obj["ui"].hint("Install restic: apt install restic")
+        raise SystemExit(1)
 
     config = ctx.obj["config"]
     return CommandContext(

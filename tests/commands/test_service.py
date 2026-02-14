@@ -47,7 +47,9 @@ class TestServiceCommand:
         with patch("osiris.commands.service.systemd") as mock_systemd:
             mock_systemd.is_installed.return_value = True
             mock_systemd.is_active.return_value = False
-            mock_systemd.get_timer_status.return_value = {"next_run": "2026-01-05 02:00:00"}
+            mock_systemd.get_timer_status.return_value = {
+                "next_run": "2026-01-05 02:00:00"
+            }
 
             runner = CliRunner()
             result = runner.invoke(

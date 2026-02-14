@@ -3,6 +3,7 @@
 import logging
 import os
 import secrets
+import shutil
 import string
 from pathlib import Path
 
@@ -13,7 +14,6 @@ from osiris.config import LoggingConfig
 from osiris.env import is_production
 from osiris.logging import setup_logging
 from osiris.restic import Restic
-
 
 # Default paths (used in production environment)
 DEFAULT_PASSWORD_FILE = Path("/etc/osiris/repo-password")
@@ -56,6 +56,7 @@ def _get_paths(config_path: Path) -> dict:
             "cache_dir": config_dir / "cache",
             "run_dir": config_dir / "run",
         }
+
 
 # Config template
 DEFAULT_CONFIG_TEMPLATE = """\
@@ -225,6 +226,11 @@ def init(ctx, repository: str, generate_password: bool, force: bool):
         raise SystemExit(1)
 
     # Step 6: Initialize restic repository
+    if not shutil.which("restic"):
+        ui.error("restic binary not found in PATH")
+        ui.hint("Install restic: apt install restic")
+        raise SystemExit(1)
+
     restic = Restic(repository, str(paths["password_file"]))
 
     if restic.is_initialized() and not force:

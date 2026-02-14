@@ -1,7 +1,7 @@
 """Shared test fixtures."""
 
 import json
-import os
+import shutil
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,6 +18,24 @@ def set_test_environment(monkeypatch):
     See docs/environment.md for details on the environment system.
     """
     monkeypatch.setenv("OSIRIS_ENV", "test")
+
+
+@pytest.fixture(autouse=True)
+def mock_restic_binary(monkeypatch):
+    """
+    Mock shutil.which to pretend restic is installed.
+
+    Tests use mock_subprocess to intercept actual restic calls,
+    but we need to pass the binary existence check first.
+    """
+    original_which = shutil.which
+
+    def patched_which(cmd):
+        if cmd == "restic":
+            return "/usr/bin/restic"
+        return original_which(cmd)
+
+    monkeypatch.setattr(shutil, "which", patched_which)
 
 
 @pytest.fixture

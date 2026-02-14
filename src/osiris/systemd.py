@@ -15,7 +15,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/osiris backup --non-interactive --force
+ExecStart=/usr/bin/osiris backup --non-interactive --force
 User=root
 
 # Logging to journal
