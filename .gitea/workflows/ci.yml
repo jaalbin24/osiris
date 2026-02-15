@@ -55,3 +55,21 @@ jobs:
 
       - name: Run tests
         run: poetry run pytest -v
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run integration tests
+        run: make -C tests/integration test
+
+      - name: Collect logs on failure
+        if: failure()
+        run: make -C tests/integration logs
+
+      - name: Cleanup
+        if: always()
+        run: make -C tests/integration clean
