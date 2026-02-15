@@ -41,7 +41,7 @@ section() {
 
 # Shorthand: run osiris in non-interactive mode
 osiris() {
-    poetry run osiris --config /etc/osiris/config.yaml --non-interactive "$@"
+    command osiris --config /etc/osiris/config.yaml --non-interactive "$@"
 }
 
 # ---------------------------------------------------------------------------
@@ -71,7 +71,7 @@ else
 fi
 
 # Restic repo is initialized
-if poetry run restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots --json >/dev/null 2>&1; then
+if restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots --json >/dev/null 2>&1; then
     pass_test "Restic repo initialized"
 else
     fail_test "Restic repo initialized"
@@ -113,7 +113,7 @@ if [ -n "$BATCH_ID" ]; then
 else
     fail_test "Could not extract batch ID from list output"
     # Try to continue with a fallback - check restic directly
-    BATCH_ID=$(poetry run restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots --json 2>/dev/null \
+    BATCH_ID=$(restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots --json 2>/dev/null \
         | python3 -c "
 import json,sys
 snaps=json.load(sys.stdin)

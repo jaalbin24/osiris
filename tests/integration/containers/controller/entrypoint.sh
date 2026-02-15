@@ -22,6 +22,7 @@ poetry install --no-interaction --quiet 2>&1 || {
     echo "ERROR: poetry install failed"
     exit 1
 }
+ln -sf "$(poetry env info -p)/bin/osiris" /usr/local/bin/osiris
 
 # 4. Copy test config into place
 cp /app/tests/integration/config/osiris-config.yaml /etc/osiris/config.yaml
@@ -55,9 +56,9 @@ done
 echo "==> MinIO ready"
 
 # 6. Initialize restic repo if needed
-if ! poetry run restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots >/dev/null 2>&1; then
+if ! restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots >/dev/null 2>&1; then
     echo "==> Initializing restic repository..."
-    poetry run restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password init
+    restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password init
 fi
 
 echo "==> Controller ready"
