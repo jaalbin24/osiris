@@ -10,20 +10,13 @@ from osiris.context import get_context
 
 
 @click.command()
-@click.option("--update-file", is_flag=True, help="Also update the password file")
 @click.pass_context
-def chpass(ctx, update_file):
+def chpass(ctx):
     """
     Change repository password.
 
-    This adds a new password to the repository. The old password
-    remains valid until explicitly removed.
-
-    Use --update-file to also update /etc/osiris/repo-password
-    with the new password.
-
-    After changing the password, you may want to remove the old key
-    using 'restic key remove <key-id>' (list keys with 'restic key list').
+    This adds a new password to the repository, updates the password file,
+    and removes the old key(s).
     """
     c = get_context(ctx)
     ui = c.ui
@@ -50,13 +43,16 @@ def chpass(ctx, update_file):
         if not ui.confirm("Continue anyway?"):
             raise SystemExit(1)
 
-    # Show current keys
+    # Show current keys and record old key IDs for later removal
+    old_key_ids = []
     ui.info("Current repository keys:")
     try:
         keys = restic.key_list()
         for key in keys:
             current = " (current)" if key.get("current") else ""
-            ui.info(f"  {key.get('id', 'unknown')[:8]}{current}")
+            key_id = key.get("id", "unknown")
+            ui.info(f"  {key_id[:8]}{current}")
+            old_key_ids.append(key_id)
     except Exception as e:
         ui.warning(f"Could not list keys: {e}")
 
@@ -72,29 +68,33 @@ def chpass(ctx, update_file):
         ui.error(f"Failed to add key: {stderr}")
         raise SystemExit(1)
 
-    # Update password file if requested
-    if update_file:
-        password_path = Path(config.password_file)
-        try:
-            # Write atomically by writing to temp file first
-            temp_path = password_path.with_suffix(".new")
-            fd = os.open(
-                temp_path,
-                os.O_WRONLY | os.O_CREAT | os.O_EXCL,
-                mode=0o400,
-            )
-            with os.fdopen(fd, "w") as f:
-                f.write(new_password + "\n")
-            temp_path.rename(password_path)
-            ui.success(f"Updated password file: {password_path}")
-            logger.info(f"Updated password file: {password_path}")
-        except Exception as e:
-            ui.error(f"Failed to update password file: {e}")
-            ui.warning("New key was added but password file not updated")
-            ui.hint(f"Manually update {password_path} with the new password")
+    # Update password file
+    password_path = Path(config.password_file)
+    try:
+        # Write atomically by writing to temp file first
+        temp_path = password_path.with_suffix(".new")
+        fd = os.open(
+            temp_path,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL,
+            mode=0o400,
+        )
+        with os.fdopen(fd, "w") as f:
+            f.write(new_password + "\n")
+        temp_path.rename(password_path)
+        ui.success(f"Updated password file: {password_path}")
+        logger.info(f"Updated password file: {password_path}")
+    except Exception as e:
+        ui.error(f"Failed to update password file: {e}")
+        ui.warning("New key was added but password file not updated")
+        ui.hint(f"Manually update {password_path} with the new password")
+        return
 
-    # Remind about old key
-    print()
-    ui.hint("The old password still works. To remove it:")
-    ui.hint("  1. Run 'restic -r <repo> key list' to find the old key ID")
-    ui.hint("  2. Run 'restic -r <repo> key remove <old-key-id>'")
+    # Remove old key(s)
+    for old_id in old_key_ids:
+        try:
+            restic.key_remove(old_id)
+            ui.success(f"Removed old key: {old_id[:8]}")
+            logger.info(f"Removed old repository key: {old_id}")
+        except Exception as e:
+            ui.warning(f"Could not remove old key {old_id[:8]}: {e}")
+            ui.hint("You may want to remove it manually with 'restic key remove'")
