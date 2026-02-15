@@ -1,0 +1,61 @@
+services:
+  controller:
+    build:
+      context: containers/controller
+    volumes:
+      - ../../:/app:ro
+      - ssh-keys:/etc/osiris/ssh
+      - restic-repo:/var/backups/osiris/repo
+      - staging:/var/cache/osiris
+      - logs:/var/log/osiris
+      - run:/run/osiris
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/.controller_ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 10s
+    networks:
+      - osiris-test
+    command: ["sleep", "infinity"]
+
+  postgres:
+    build:
+      context: containers/postgres
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - ssh-keys:/etc/osiris/ssh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres && test -f /tmp/.sshd_ready"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks:
+      - osiris-test
+
+  minio:
+    build:
+      context: containers/minio
+    volumes:
+      - ssh-keys:/etc/osiris/ssh:ro
+      - minio-data:/var/lib/minio/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live && test -f /tmp/.sshd_ready"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    networks:
+      - osiris-test
+
+volumes:
+  ssh-keys:
+  restic-repo:
+  staging:
+  logs:
+  run:
+  minio-data:
+
+networks:
+  osiris-test:
+    driver: bridge

@@ -1,0 +1,29 @@
+repository: /var/backups/osiris/repo
+password_file: /etc/osiris/repo-password
+logging:
+  level: debug
+  file: /var/log/osiris/osiris.log
+  journal: false
+ssh:
+  user: osiris
+  key_file: /etc/osiris/ssh/id_ed25519
+  control_master: true
+  control_path: /run/osiris/ssh-%r@%h:%p
+  control_persist: 300
+targets:
+  postgres:
+    type: pg_dump
+    host: postgres
+    pg_user: postgres
+    databases:
+      - osiris_test
+      - osiris_analytics
+  minio:
+    type: rsync
+    host: minio
+    path: /var/lib/minio/data
+    staging_dir: /var/cache/osiris/minio
+retention:
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
