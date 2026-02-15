@@ -80,7 +80,8 @@ def require_force(f):
     def wrapper(ctx, *args, **kwargs):
         ui = ctx.obj["ui"]
         force = kwargs.get("force", False)
-        if not ui.interactive and not force:
+        dry_run = kwargs.get("dry_run", False)
+        if not ui.interactive and not force and not dry_run:
             ui.error("Non-interactive mode requires --force flag")
             raise SystemExit(1)
         return f(ctx, *args, **kwargs)

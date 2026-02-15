@@ -29,8 +29,12 @@ ssh-keygen -A
 touch /tmp/.sshd_ready
 echo "==> SSH ready"
 
-# 5. Launch seed script in background (waits for MinIO to be healthy)
+# 5. Fix data-dir ownership (volume may carry stale root-owned metadata)
+chown -R minio:minio /var/lib/minio/data
+chmod -R g+rwX /var/lib/minio/data
+
+# 6. Launch seed script in background (waits for MinIO to be healthy)
 /seed-data.sh &
 
-# 6. Exec MinIO server
+# 7. Exec MinIO server
 exec runuser -u minio -- sh -c 'umask 002 && exec minio server /var/lib/minio/data --console-address ":9001"'
