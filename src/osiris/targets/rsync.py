@@ -135,7 +135,13 @@ class RsyncTarget(BackupTarget):
                 f"{restored_data}/",
                 f"{remote}:{self.path}/",
             ]
-            subprocess.run(rsync_cmd, check=True, capture_output=True)
+            result = subprocess.run(rsync_cmd, capture_output=True)
+            # Exit 23 = partial transfer (e.g. service metadata files locked
+            # by a running process). Data files are restored; treat as success.
+            if result.returncode not in (0, 23):
+                raise subprocess.CalledProcessError(
+                    result.returncode, rsync_cmd, result.stdout, result.stderr
+                )
 
     def _find_restored_data(self, restore_root: str) -> str:
         """

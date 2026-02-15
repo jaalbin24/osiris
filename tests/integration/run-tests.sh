@@ -247,6 +247,50 @@ if [ -n "$BATCH_ID" ]; then
     else
         fail_test "Restore recovered sessions (expected 2, got '$SESSION_COUNT')"
     fi
+
+    # -- Minio restore --
+    # Delete a seed file to verify restore brings it back
+    ssh -o BatchMode=yes -i /etc/osiris/ssh/id_ed25519 osiris@minio \
+        "rm -f /var/lib/minio/data/test-bucket/data-001.json" \
+        >/dev/null 2>&1
+
+    # Verify the file is gone
+    FILE_CHECK=$(ssh -o BatchMode=yes -i /etc/osiris/ssh/id_ed25519 osiris@minio \
+        "test -f /var/lib/minio/data/test-bucket/data-001.json && echo exists || echo missing" \
+        2>/dev/null | tr -d ' \n\r')
+    if [ "$FILE_CHECK" = "missing" ]; then
+        pass_test "Verified data-001.json was deleted from minio"
+    else
+        fail_test "data-001.json still exists after deletion"
+    fi
+
+    # Restore minio target
+    OUTPUT=$(osiris restore --batch-id "$BATCH_ID" --target minio --force 2>&1) && RC=$? || RC=$?
+    if [ "$RC" -eq 0 ]; then
+        pass_test "osiris restore --batch-id $BATCH_ID --target minio"
+    else
+        fail_test "osiris restore --batch-id $BATCH_ID --target minio" "$OUTPUT"
+    fi
+
+    # Verify file was restored
+    FILE_CHECK=$(ssh -o BatchMode=yes -i /etc/osiris/ssh/id_ed25519 osiris@minio \
+        "test -f /var/lib/minio/data/test-bucket/data-001.json && echo exists || echo missing" \
+        2>/dev/null | tr -d ' \n\r')
+    if [ "$FILE_CHECK" = "exists" ]; then
+        pass_test "Restore recovered data-001.json"
+    else
+        fail_test "Restore did not recover data-001.json"
+    fi
+
+    # Verify content matches seed data
+    RESTORED_CONTENT=$(ssh -o BatchMode=yes -i /etc/osiris/ssh/id_ed25519 osiris@minio \
+        "cat /var/lib/minio/data/test-bucket/data-001.json" 2>/dev/null)
+    EXPECTED='{"id": 1, "name": "alpha", "tags": ["test", "seed"], "timestamp": "2026-01-15T10:00:00Z"}'
+    if [ "$RESTORED_CONTENT" = "$EXPECTED" ]; then
+        pass_test "Restored data-001.json content matches seed data"
+    else
+        fail_test "Restored data-001.json content mismatch" "got: $RESTORED_CONTENT"
+    fi
 else
     skip_test "Restore tests (no batch ID available)"
 fi
