@@ -4,7 +4,7 @@ import subprocess
 
 import click
 
-from osiris.context import get_context
+from osiris.context import get_context, require_force
 
 
 @click.command()
@@ -15,6 +15,7 @@ from osiris.context import get_context
 )
 @click.option("--force", is_flag=True, help="Required for non-interactive mode")
 @click.pass_context
+@require_force
 def prune(ctx, dry_run, force):
     """
     Remove old backups per retention policy.
@@ -44,13 +45,8 @@ def prune(ctx, dry_run, force):
     ui.info(f"  Keep monthly: {retention.keep_monthly}")
     print()
 
-    # In non-interactive mode without dry-run, require --force
-    if not ui.interactive and not dry_run and not force:
-        ui.error("Non-interactive mode requires --force flag (or use --dry-run)")
-        raise SystemExit(1)
-
-    # Confirm unless dry-run
-    if not dry_run and ui.interactive:
+    # Confirm unless dry-run or --force
+    if not dry_run and not force and ui.interactive:
         if not ui.confirm(
             "Apply retention policy and remove old snapshots?", default=False
         ):

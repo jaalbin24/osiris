@@ -4,7 +4,7 @@ import click
 
 from osiris.batch import parse_target_info, resolve_batch
 from osiris.config import PostgresTargetConfig, RsyncTargetConfig
-from osiris.context import get_context
+from osiris.context import get_context, require_force
 from osiris.ssh import SSHManager, register_cleanup, unregister_cleanup
 from osiris.targets.postgres import PostgresTarget
 from osiris.targets.rsync import RsyncTarget
@@ -24,6 +24,7 @@ from osiris.targets.rsync import RsyncTarget
     "--dry-run", is_flag=True, help="Show what would be restored without doing it"
 )
 @click.pass_context
+@require_force
 def restore(ctx, batch_id, target, database, force, dry_run):
     """
     Restore from a backup.
@@ -37,11 +38,6 @@ def restore(ctx, batch_id, target, database, force, dry_run):
     config = c.config
     logger = c.logger
     restic = c.restic
-
-    # In non-interactive mode, --force is required (unless dry-run)
-    if not ui.interactive and not force and not dry_run:
-        ui.error("Non-interactive mode requires --force flag for restore")
-        raise SystemExit(1)
 
     # Check for stale locks
     restic.ensure_unlocked(ui, logger)
@@ -114,7 +110,7 @@ def restore(ctx, batch_id, target, database, force, dry_run):
     if any(i["target_config"].type == "rsync" for i in restore_items):
         ui.warning("Remote files will be OVERWRITTEN with backup contents.")
 
-    if ui.interactive:
+    if not force and ui.interactive:
         print()
         if not ui.confirm("Proceed with restore?", default=False):
             ui.info("Restore cancelled")

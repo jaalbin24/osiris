@@ -36,6 +36,6 @@ dd if=/dev/urandom of="$BUCKET_DIR/binary-blob.bin" bs=1024 count=64 2>/dev/null
 echo "This is a nested test file for rsync backup verification." > "$BUCKET_DIR/subdir/nested.txt"
 
 # Set ownership
-chown -R osiris:osiris "$BUCKET_DIR"
+chown -R minio:minio "$BUCKET_DIR"
 
 echo "==> MinIO seed data ready"

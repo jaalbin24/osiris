@@ -33,4 +33,4 @@ echo "==> SSH ready"
 /seed-data.sh &
 
 # 6. Exec MinIO server
-exec minio server /var/lib/minio/data --console-address ":9001"
+exec runuser -u minio -- sh -c 'umask 002 && exec minio server /var/lib/minio/data --console-address ":9001"'

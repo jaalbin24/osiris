@@ -14,16 +14,22 @@ RUN curl -fsSL https://dl.min.io/server/minio/release/linux-amd64/minio -o /usr/
     && curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc \
     && chmod +x /usr/local/bin/mc
 
-# Create osiris user
+# Create minio user (service owner)
+RUN useradd -r -s /usr/sbin/nologin minio
+
+# Create osiris user (backup operator) and add to minio group
 RUN useradd -m -s /bin/bash osiris \
     && usermod -p '*' osiris \
+    && usermod -aG minio osiris \
     && mkdir -p /home/osiris/.ssh \
     && chown -R osiris:osiris /home/osiris/.ssh \
     && chmod 700 /home/osiris/.ssh
 
-# Create MinIO data directory
+# Create MinIO data directory (owned by minio, group-writable for osiris)
 RUN mkdir -p /var/lib/minio/data \
-    && chown -R osiris:osiris /var/lib/minio
+    && chown -R minio:minio /var/lib/minio \
+    && chmod -R g+rwX /var/lib/minio \
+    && chmod g+s /var/lib/minio/data
 
 # Ensure sshd runtime directory exists
 RUN mkdir -p /run/sshd
