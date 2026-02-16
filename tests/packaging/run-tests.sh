@@ -5,8 +5,8 @@ set -euo pipefail
 PASS=0
 FAIL=0
 
-pass() { echo "  PASS: $1"; ((PASS++)); }
-fail() { echo "  FAIL: $1"; ((FAIL++)); }
+pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
+fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 
 check() {
     local desc="$1"; shift
@@ -59,7 +59,7 @@ echo ""
 # ── Phase 3: Init + trigger ─────────────────────────────────────────
 echo "Phase 3: Init + trigger"
 
-osiris init --generate-password --non-interactive > /dev/null 2>&1
+osiris init --generate-password > /dev/null 2>&1
 check "Config created" test -f /etc/osiris/config.yaml
 
 systemctl start osiris-backup.timer
