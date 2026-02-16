@@ -262,7 +262,9 @@ def init(ctx, repository: str, generate_password: bool, force: bool):
     ui.info(f"  1. Edit {config_path} to add your backup targets")
     ui.info("  2. Run 'osiris validate' to test configuration")
     ui.info("  3. Run 'osiris backup --force' to test manually")
-    ui.info("  4. Run 'sudo systemctl start osiris-backup.timer' to activate scheduled backups")
+    ui.info(
+        "  4. Run 'sudo systemctl start osiris-backup.timer' to activate scheduled backups"
+    )
 
 
 def _install_logrotate_config(ui, logger: logging.Logger, log_file: Path) -> None:

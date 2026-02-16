@@ -67,14 +67,18 @@ class TestChpassCommand:
 
         # Verify key remove was called with old key ID
         remove_calls = [
-            cmd for cmd, _ in mock_subprocess.calls if "key" in str(cmd) and "remove" in str(cmd)
+            cmd
+            for cmd, _ in mock_subprocess.calls
+            if "key" in str(cmd) and "remove" in str(cmd)
         ]
         assert len(remove_calls) == 1
         assert "abc12345" in str(remove_calls[0])
 
         assert "removed old key" in result.output.lower()
 
-    def test_chpass_key_remove_failure_still_succeeds(self, tmp_config, tmp_path, mock_subprocess):
+    def test_chpass_key_remove_failure_still_succeeds(
+        self, tmp_config, tmp_path, mock_subprocess
+    ):
         """Test that chpass succeeds with a warning when key_remove fails."""
         mock_subprocess.add_response(
             cmd_contains=["restic", "key", "list"],
