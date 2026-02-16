@@ -1,0 +1,23 @@
+[Unit]
+Description=Osiris Backup Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/osiris backup --non-interactive --force
+User=root
+
+# Logging to journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=osiris
+
+# Security hardening
+ProtectSystem=strict
+ReadWritePaths=/backup /var/log/osiris /var/cache/osiris /run/osiris
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

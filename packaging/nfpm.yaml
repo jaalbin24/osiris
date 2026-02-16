@@ -1,0 +1,55 @@
+name: osiris
+arch: amd64
+platform: linux
+version: "${VERSION}"
+maintainer: "Kriib <packages@kriib.com>"
+description: "CLI backup management tool wrapping restic for PostgreSQL and MinIO"
+homepage: "https://gitea.kriib.com/infra/osiris"
+license: "MIT"
+
+depends:
+  - restic
+  - python3 (>= 3.11)
+
+contents:
+  # The entire virtualenv with bundled dependencies
+  - src: staging/opt/osiris
+    dst: /opt/osiris
+    type: tree
+
+  # Wrapper script to /usr/bin
+  - src: packaging/wrapper/osiris
+    dst: /usr/bin/osiris
+    file_info:
+      mode: 0755
+
+  # Create required directories (empty, owned by package)
+  - dst: /etc/osiris
+    type: dir
+    file_info:
+      mode: 0750
+
+  - dst: /var/log/osiris
+    type: dir
+    file_info:
+      mode: 0750
+
+  - dst: /var/cache/osiris
+    type: dir
+    file_info:
+      mode: 0750
+
+  # Systemd unit files
+  - src: packaging/systemd/osiris-backup.service
+    dst: /lib/systemd/system/osiris-backup.service
+    file_info:
+      mode: 0644
+  - src: packaging/systemd/osiris-backup.timer
+    dst: /lib/systemd/system/osiris-backup.timer
+    file_info:
+      mode: 0644
+
+scripts:
+  postinstall: packaging/scripts/postinst.sh
+  preremove: packaging/scripts/prerm.sh
+  postremove: packaging/scripts/postrm.sh

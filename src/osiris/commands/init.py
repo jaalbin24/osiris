@@ -9,7 +9,6 @@ from pathlib import Path
 
 import click
 
-from osiris import systemd
 from osiris.config import LoggingConfig
 from osiris.env import is_production
 from osiris.logging import setup_logging
@@ -245,42 +244,17 @@ def init(ctx, repository: str, generate_password: bool, force: bool):
             ui.error(f"Failed to initialize repository: {e}")
             raise SystemExit(1)
 
-    # Step 7: Install systemd service and timer
-    if systemd.is_systemd_available():
-        try:
-            if systemd.is_installed() and not force:
-                ui.info("Systemd service already installed")
-            else:
-                systemd.install_service()
-                ui.success("Installed systemd service")
-                logger.info("Installed systemd service")
-
-            if not systemd.is_enabled():
-                systemd.enable_timer()
-                ui.success("Enabled backup timer (daily at 2:00 AM)")
-                logger.info("Enabled backup timer")
-            else:
-                ui.info("Backup timer already enabled")
-
-        except PermissionError:
-            ui.warning("Could not install systemd service (permission denied)")
-            ui.hint("Run: sudo osiris service install")
-        except Exception as e:
-            ui.warning(f"Could not install systemd service: {e}")
-    else:
-        ui.info("Systemd not available, skipping service installation")
-
-    # Step 8: Install logrotate config
+    # Step 7: Install logrotate config
     _install_logrotate_config(ui, logger, paths["log_file"])
 
-    # Step 9: Show password if generated
+    # Step 8: Show password if generated
     if generate_password:
         print()
         ui.warning("IMPORTANT: Save this password securely!")
         ui.info(f"Password: {password}")
         ui.hint("This is the only time the password will be displayed")
 
-    # Step 10: Show next steps
+    # Step 9: Show next steps
     print()
     ui.success("Initialization complete!")
     print()
@@ -288,6 +262,7 @@ def init(ctx, repository: str, generate_password: bool, force: bool):
     ui.info(f"  1. Edit {config_path} to add your backup targets")
     ui.info("  2. Run 'osiris validate' to test configuration")
     ui.info("  3. Run 'osiris backup --force' to test manually")
+    ui.info("  4. Run 'sudo systemctl start osiris-backup.timer' to activate scheduled backups")
 
 
 def _install_logrotate_config(ui, logger: logging.Logger, log_file: Path) -> None:
