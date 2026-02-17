@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsync \
     curl \
     bzip2 \
+    git \
     && rm -rf /var/lib/apt/lists/* \
     && printf 'Host *\n    StrictHostKeyChecking no\n    UserKnownHostsFile /dev/null\n    LogLevel ERROR\n' >> /etc/ssh/ssh_config
 

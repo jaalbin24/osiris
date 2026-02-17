@@ -28,7 +28,7 @@ clean:
 	$(COMPOSE) -p $(PROJECT) down -v --remove-orphans
 
 logs:
-	$(COMPOSE) -p $(PROJECT) logs -f
+	$(COMPOSE) -p $(PROJECT) logs --tail=200
 
 shell:
 	$(COMPOSE) -p $(PROJECT) exec controller bash
