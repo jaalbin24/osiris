@@ -15,11 +15,16 @@ fi
 echo "osiris-test-password" > /etc/osiris/repo-password
 chmod 600 /etc/osiris/repo-password
 
-# 3. Install Osiris from mounted source
-echo "==> Installing Osiris..."
+# 3. Install Osiris from mounted source (/app is read-only)
+echo "==> Installing dependencies..."
 cd /app
-poetry install --no-interaction --quiet 2>&1 || {
-    echo "ERROR: poetry install failed"
+poetry install --no-root --no-interaction || {
+    echo "ERROR: poetry install (dependencies) failed"
+    exit 1
+}
+echo "==> Installing osiris..."
+poetry run pip install --no-deps /app || {
+    echo "ERROR: pip install osiris failed"
     exit 1
 }
 ln -sf "$(poetry env info -p)/bin/osiris" /usr/local/bin/osiris
