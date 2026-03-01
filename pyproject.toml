@@ -1,9 +1,16 @@
-[tool.poetry]
+[project]
 name = "osiris"
 version = "0.1.0"
 description = "CLI backup management tool wrapping restic for PostgreSQL and MinIO"
-authors = ["Kriib"]
 readme = "README.md"
+authors = [{name = "Kriib"}]
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[project.scripts]
+osiris = "osiris.cli:cli"
+
+[tool.poetry]
 packages = [{include = "osiris", from = "src"}]
 
 [tool.poetry.dependencies]
@@ -17,9 +24,6 @@ pytest = "^8.0"
 pytest-mock = "^3.12"
 pytest-cov = "^7.0.0"
 ruff = "^0.8"
-
-[tool.poetry.scripts]
-osiris = "osiris.cli:cli"
 
 [build-system]
 requires = ["poetry-core"]
