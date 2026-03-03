@@ -17,13 +17,18 @@ packages = [{include = "osiris", from = "src"}]
 python = "^3.11"
 click = "^8.1"
 pyyaml = "^6.0"
-iris = {git = "https://github.com/jaalbin24/iris.git", tag = "v1.0.0"}
+kriib-iris = "^1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0"
 pytest-mock = "^3.12"
 pytest-cov = "^7.0.0"
 ruff = "^0.8"
+
+[[tool.poetry.source]]
+name = "kriib-internal"
+url = "https://prod-pulp-01.kriib.com/pulp/content/python/kriib-internal/simple/"
+priority = "supplemental"
 
 [build-system]
 requires = ["poetry-core"]
