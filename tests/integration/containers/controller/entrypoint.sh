@@ -17,10 +17,12 @@ chmod 600 /etc/osiris/repo-password
 
 # 3. Install Osiris from mounted source (/app is read-only)
 echo "==> Installing osiris..."
-pip install --no-deps /app || {
+cp -r /app /tmp/osiris-build
+pip install --no-deps /tmp/osiris-build || {
     echo "ERROR: pip install osiris failed"
     exit 1
 }
+rm -rf /tmp/osiris-build
 
 # 4. Copy test config into place
 cp /app/tests/integration/config/osiris-config.yaml /etc/osiris/config.yaml
