@@ -4,6 +4,8 @@ services:
       context: containers/controller
       additional_contexts:
         - project=../../
+      secrets:
+        - ca_cert
     volumes:
       - ../../:/app:ro
       - ssh-keys:/etc/osiris/ssh
@@ -49,6 +51,10 @@ services:
       retries: 30
     networks:
       - osiris-test
+
+secrets:
+  ca_cert:
+    file: /usr/local/share/ca-certificates/kriib-internal-ca.crt
 
 volumes:
   ssh-keys:

@@ -19,6 +19,14 @@ RUN curl -fsSL "https://github.com/restic/restic/releases/download/v${RESTIC_VER
 # Install poetry
 RUN pip install --no-cache-dir poetry
 
+# Install dependencies at build time
+WORKDIR /build
+COPY --from=project pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false
+RUN --mount=type=secret,id=ca_cert,target=/usr/local/share/ca-certificates/kriib-internal-ca.crt \
+    update-ca-certificates \
+ && poetry install --no-root --no-interaction
+
 # Create Osiris directory structure
 RUN mkdir -p \
     /etc/osiris/ssh \
