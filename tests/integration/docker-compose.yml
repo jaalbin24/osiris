@@ -2,6 +2,8 @@ services:
   controller:
     build:
       context: containers/controller
+      additional_contexts:
+        - project=../../
     volumes:
       - ../../:/app:ro
       - ssh-keys:/etc/osiris/ssh
