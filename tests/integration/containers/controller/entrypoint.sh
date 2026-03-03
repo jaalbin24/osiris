@@ -15,19 +15,10 @@ fi
 echo "osiris-test-password" > /etc/osiris/repo-password
 chmod 600 /etc/osiris/repo-password
 
-# 3. Install Osiris from mounted source (/app is read-only)
-echo "==> Installing osiris..."
-cp -r /app /tmp/osiris-build
-pip install --no-deps /tmp/osiris-build || {
-    echo "ERROR: pip install osiris failed"
-    exit 1
-}
-rm -rf /tmp/osiris-build
+# 3. Copy test config into place
+cp /build/tests/integration/config/osiris-config.yaml /etc/osiris/config.yaml
 
-# 4. Copy test config into place
-cp /app/tests/integration/config/osiris-config.yaml /etc/osiris/config.yaml
-
-# 5. Wait for postgres and minio to be healthy
+# 4. Wait for postgres and minio to be healthy
 echo "==> Waiting for postgres..."
 TIMEOUT=120
 ELAPSED=0
@@ -55,7 +46,7 @@ while ! ssh -o BatchMode=yes -o ConnectTimeout=2 -o StrictHostKeyChecking=no \
 done
 echo "==> MinIO ready"
 
-# 6. Initialize restic repo if needed
+# 5. Initialize restic repo if needed
 if ! restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password snapshots >/dev/null 2>&1; then
     echo "==> Initializing restic repository..."
     restic --repo /var/backups/osiris/repo --password-file /etc/osiris/repo-password init
@@ -63,6 +54,6 @@ fi
 
 echo "==> Controller ready"
 
-# 7. Signal readiness and execute CMD
+# 6. Signal readiness and execute CMD
 touch /tmp/.controller_ready
 exec "$@"

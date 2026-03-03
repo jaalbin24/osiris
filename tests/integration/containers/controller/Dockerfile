@@ -35,6 +35,10 @@ RUN mkdir -p \
     /var/backups/osiris/repo \
     /run/osiris
 
+# Copy full project source and install package
+COPY --from=project . .
+RUN pip install --no-deps .
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
