@@ -23,8 +23,8 @@ RUN pip install --no-cache-dir poetry
 WORKDIR /build
 COPY --from=project pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false
-RUN --mount=type=secret,id=ca_cert,target=/usr/local/share/ca-certificates/kriib-internal-ca.crt \
-    update-ca-certificates \
+COPY --from=ca_certs . /usr/local/share/ca-certificates/
+RUN update-ca-certificates \
  && poetry install --no-root --no-interaction
 
 # Create Osiris directory structure
