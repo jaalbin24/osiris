@@ -4,7 +4,7 @@ services:
       context: containers/controller
       additional_contexts:
         - project=../../
-        - ca_certs=/usr/local/share/ca-certificates
+        - ca_certs=/etc/ssl/certs
     volumes:
       - ../../:/app:ro
       - ssh-keys:/etc/osiris/ssh

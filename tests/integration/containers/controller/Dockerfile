@@ -23,9 +23,9 @@ RUN pip install --no-cache-dir poetry
 WORKDIR /build
 COPY --from=project pyproject.toml poetry.lock ./
 RUN poetry config virtualenvs.create false
-COPY --from=ca_certs . /usr/local/share/ca-certificates/
-RUN update-ca-certificates \
- && poetry install --no-root --no-interaction
+COPY --from=ca_certs ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+RUN poetry install --no-root --no-interaction
 
 # Create Osiris directory structure
 RUN mkdir -p \
