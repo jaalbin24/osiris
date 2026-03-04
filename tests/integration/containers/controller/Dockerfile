@@ -42,7 +42,7 @@ RUN pip install --no-deps .
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-WORKDIR /app
+WORKDIR /build
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["sleep", "infinity"]
