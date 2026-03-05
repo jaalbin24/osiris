@@ -39,5 +39,11 @@ ENV/
 *.swp
 *.swo
 
+# Vagrant
+.vagrant/
+
+# nfpm staging
+staging/
+
 # OS
 .DS_Store

@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-deb:
+    name: Build .deb Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Install nfpm
+        run: |
+          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
+          sudo apt-get update
+          sudo apt-get install -y nfpm
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build wheel
+        run: poetry build --format wheel
+
+      - name: Create staging virtualenv
+        run: |
+          python3 -m venv staging/opt/osiris/venv
+          staging/opt/osiris/venv/bin/pip install --upgrade pip
+          staging/opt/osiris/venv/bin/pip install dist/osiris-*.whl
+
+      - name: Build .deb package
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }} nfpm package \
+            --config packaging/nfpm.yaml \
+            --packager deb \
+            --target dist/
+
+      - name: Upload to Gitea Package Registry
+        run: |
+          curl --user "${{ secrets.GITEA_USER }}:${{ secrets.GITEA_TOKEN }}" \
+            --upload-file dist/osiris_${{ steps.version.outputs.VERSION }}_amd64.deb \
+            "${{ vars.GITEA_URL }}/api/packages/${{ github.repository_owner }}/debian/pool/main/o/osiris/"

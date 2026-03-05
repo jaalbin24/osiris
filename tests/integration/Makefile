@@ -19,7 +19,7 @@ up:
 	$(COMPOSE) -p $(PROJECT) up -d --wait
 
 test: up
-	$(COMPOSE) -p $(PROJECT) exec -T controller bash /app/tests/integration/run-tests.sh
+	$(COMPOSE) -p $(PROJECT) exec -T controller bash /build/tests/integration/run-tests.sh
 
 down:
 	$(COMPOSE) -p $(PROJECT) down
@@ -28,7 +28,7 @@ clean:
 	$(COMPOSE) -p $(PROJECT) down -v --remove-orphans
 
 logs:
-	$(COMPOSE) -p $(PROJECT) logs -f
+	$(COMPOSE) -p $(PROJECT) logs --tail=200
 
 shell:
 	$(COMPOSE) -p $(PROJECT) exec controller bash

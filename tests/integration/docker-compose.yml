@@ -2,8 +2,10 @@ services:
   controller:
     build:
       context: containers/controller
+      additional_contexts:
+        - project=../../
+        - ca_certs=/etc/ssl/certs
     volumes:
-      - ../../:/app:ro
       - ssh-keys:/etc/osiris/ssh
       - restic-repo:/var/backups/osiris/repo
       - staging:/var/cache/osiris

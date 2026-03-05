@@ -56,7 +56,6 @@ from osiris.commands.init import init
 from osiris.commands.list import list_cmd
 from osiris.commands.prune import prune
 from osiris.commands.restore import restore
-from osiris.commands.service import service
 from osiris.commands.show import show
 from osiris.commands.status import status
 from osiris.commands.unlock import unlock
@@ -74,7 +73,6 @@ cli.add_command(chpass)
 cli.add_command(init)
 cli.add_command(unlock)
 cli.add_command(validate)
-cli.add_command(service)
 
 
 def main():

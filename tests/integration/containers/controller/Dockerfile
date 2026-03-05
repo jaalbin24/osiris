@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsync \
     curl \
     bzip2 \
+    git \
     && rm -rf /var/lib/apt/lists/* \
     && printf 'Host *\n    StrictHostKeyChecking no\n    UserKnownHostsFile /dev/null\n    LogLevel ERROR\n' >> /etc/ssh/ssh_config
 
@@ -18,6 +19,14 @@ RUN curl -fsSL "https://github.com/restic/restic/releases/download/v${RESTIC_VER
 # Install poetry
 RUN pip install --no-cache-dir poetry
 
+# Install dependencies at build time
+WORKDIR /build
+COPY --from=project pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false
+COPY --from=ca_certs ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+RUN poetry install --no-root --no-interaction
+
 # Create Osiris directory structure
 RUN mkdir -p \
     /etc/osiris/ssh \
@@ -26,10 +35,14 @@ RUN mkdir -p \
     /var/backups/osiris/repo \
     /run/osiris
 
+# Copy full project source and install package
+COPY --from=project . .
+RUN pip install --no-deps .
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-WORKDIR /app
+WORKDIR /build
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["sleep", "infinity"]

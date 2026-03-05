@@ -146,20 +146,21 @@ files = [
 ]
 
 [[package]]
-name = "iris"
-version = "1.0.0"
+name = "kriib-iris"
+version = "1.1"
 description = "Terminal UI library for CLI tools"
 optional = false
-python-versions = "^3.11"
+python-versions = ">=3.11,<4.0"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "kriib_iris-1.1-py3-none-any.whl", hash = "sha256:76107938203ee38c2ef01f29b3eaad98ff86d50f07cf7e05ac7e40e3563d7c81"},
+    {file = "kriib_iris-1.1.tar.gz", hash = "sha256:940a8bbc6739b3e8e40fe5c87c55ee050bb2ef6e327e987aa37216dfd07128fa"},
+]
 
 [package.source]
-type = "git"
-url = "https://github.com/jaalbin24/iris.git"
-reference = "v1.0.0"
-resolved_reference = "8801d58aaaec71dd01853198c3af97e1648fe07e"
+type = "legacy"
+url = "https://prod-pulp-01.kriib.com/pulp/content/python/kriib-internal/simple"
+reference = "kriib-internal"
 
 [[package]]
 name = "packaging"
@@ -378,4 +379,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "29ec1fcd48d612b59f5fb35e1c7274fbda1230a8c33cfd6836a09b0f754627d7"
+content-hash = "24b035dd6fe5e6d1db32d8389a086270f04aa738ace08abb293da8059062d7f4"

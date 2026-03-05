@@ -1,0 +1,4 @@
+#!/bin/bash
+# Osiris CLI wrapper
+# Installed to /usr/bin/osiris, delegates to venv
+exec /opt/osiris/venv/bin/osiris "$@"

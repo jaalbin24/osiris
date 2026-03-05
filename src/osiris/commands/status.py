@@ -142,7 +142,9 @@ def status(ctx):
                         ui.info(f"  Next run: {next_time}")
         else:
             ui.warning("  Timer: not active")
-            ui.hint("  Run 'osiris service enable' to enable scheduled backups")
+            ui.hint(
+                "  Run 'sudo systemctl start osiris-backup.timer' to enable scheduled backups"
+            )
     except FileNotFoundError:
         ui.info("  Timer: systemd not available")
 
